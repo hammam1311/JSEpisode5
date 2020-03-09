@@ -43,11 +43,17 @@ class Point {
  **********************************************************/
 class Wallet {
   // implement Wallet!
-  constructor(money = 0) {}
+  constructor(money = 0) {
+    this.money = money
+  }
 
-  credit = amount => {};
+  credit = amount => {
+    this.money += amount;
+  };
 
-  debit = amount => {};
+  debit = amount => {
+    this.money -= amount
+  };
 }
 
 /**********************************************************
@@ -63,6 +69,16 @@ class Wallet {
  **********************************************************/
 class Person {
   // implement Person!
+  constructor(name, x, y) {
+    this.location = new Point(x, y)
+    this.wallet = new Wallet()
+    this.name = name;
+  }
+
+  moveTo = (point) => {
+    this.location = point;
+
+  }
 }
 
 /**********************************************************
@@ -80,8 +96,20 @@ class Person {
  *
  * new vendor = new Vendor(name, x, y);
  **********************************************************/
-class Vendor {
+class Vendor extends Person {
   // implement Vendor!
+  constructor(name, x, y, range = 5, price = 1) {
+    super(name, x, y)
+    this.range = range
+    this.price = price
+  }
+  sellTo = (customer, numberOfIceCreams) => {
+    this.moveTo(customer.location);
+    let total = numberOfIceCreams * this.price
+    this.wallet.credit(total);
+    customer.wallet.debit(total);
+  }
+
 }
 
 /**********************************************************
@@ -100,8 +128,45 @@ class Vendor {
  *
  * new customer = new Customer(name, x, y);
  **********************************************************/
-class Customer {
-  // implement Customer!
+class Customer extends Person {
+  constructor(name, x, y, wallet, bool1 = false, bool2 = false) {
+    super(name, x, y);
+    this.wallet = new Wallet(10);
+    this.bool1 = bool1;
+    this.bool2 = bool2;
+  }
+  _isInRange = (vendor) => {
+    let distance = this.location.distanceTo(vendor.location)
+    if (distance <= vendor.range) {
+      this.bool1 = true
+      return true
+    }
+    else {
+      console.log("not in range")
+      return false
+    }
+
+  }
+  _haveEnoughMoney = (vendor, numberOfIceCreams) => {
+    if (this.wallet.money >= (vendor.price * numberOfIceCreams)) {
+      this.bool2 = true
+      return true
+    }
+    else {
+      console.log("you are poor:)")
+      return false
+    }
+  }
+  requestIceCream = (vendor, numberOfIceCreams) => {
+    this._isInRange(vendor);
+    this._haveEnoughMoney(vendor, numberOfIceCreams);
+    if ((this.bool1 == true) && (this.bool2 == true)) {
+      vendor.sellTo(this, numberOfIceCreams)
+    }
+    else {
+      console.log("not in range or you are poor:)")
+    }
+  }
 }
 
 export { Point, Wallet, Person, Customer, Vendor };
